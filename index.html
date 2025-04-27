@@ -1,0 +1,491 @@
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        padding: 20px;
+        background: url('https://st4.depositphotos.com/2974663/27781/i/450/depositphotos_277817692-stock-photo-wooden-board-plank-texture-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        margin: 0;
+      }
+  
+      h1, h2 {
+        text-align: center;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      }
+  
+      .hidden { display: none; }
+  
+      .menu-button, .volver-button {
+        display: block;
+        margin: 20px auto;
+        padding: 15px;
+        width: 260px;
+        font-size: 18px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .menu-button:hover, .volver-button:hover {
+        background: rgba(0,0,0,0.9);
+      }
+  
+      .song-card {
+        position: relative;
+        margin: 15px 0;
+        padding: 0;
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(0,0,0,0.5);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+        transition: transform 0.3s, box-shadow 0.3s, opacity 1s;
+        opacity: 0;
+        animation: fadeIn 1s forwards;
+      }
+      .song-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.7);
+      }
+  
+      .song-card h3, .song-card p, .song-card a {
+        color: white;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        margin: 5px 0;
+      }
+  
+      .song-card button {
+        background-color: #4b79a1;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        margin-top: 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+      }
+      .song-card button:hover {
+        background-color: #3a5d7e;
+      }
+  
+      .search-bar select, .search-bar button {
+        width: 200px;
+        margin: 5px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        background: rgba(255,255,255,0.8);
+      }
+  
+      form input, form select, form button, form label {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        background: rgba(255,255,255,0.9);
+      }
+  
+      .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        background: rgba(255,255,255,0.8);
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 10px;
+      }
+  
+      @keyframes fadeIn {
+        to { opacity: 1; }
+      }
+    </style>
+  </head>
+  
+  <body>
+  
+    <!-- Pantalla de Inicio -->
+    <div id="pantalla-inicio">
+      <h1>🎶 Bienvenido al Buscador de Partituras 🎶</h1>
+      <button class="menu-button" onclick="mostrarBusqueda()">🔍 Buscar Canciones</button>
+      <button class="menu-button" onclick="mostrarAgregar()">➕ Agregar Nueva Canción</button>
+      <button class="menu-button" onclick="iniciarSesion()">🔐 Iniciar Sesión</button> <!-- NUEVO -->
+      <button id="cerrar-sesion" class="menu-button hidden" onclick="cerrarSesion()">🚪 Cerrar Sesión</button> <!-- NUEVO -->
+    </div>
+  
+    <!-- Pantalla de Búsqueda -->
+    <div id="pantalla-buscar" class="hidden">
+      <button class="volver-button" onclick="volverInicio()">⬅ Volver al Inicio</button>
+      <h2>🔍 Buscar y Filtrar Canciones</h2>
+      <div class="search-bar">
+        <select id="filtro-dificultad" onchange="filtrarCanciones()">
+          <option value="">Filtrar por Dificultad</option>
+          <option value="Rookie">Rookie</option>
+          <option value="D">D</option>
+          <option value="C">C</option>
+          <option value="B">B</option>
+          <option value="A">A</option>
+        </select>
+        <select id="filtro-instrumento" onchange="filtrarCanciones()">
+          <option value="">Filtrar por Instrumento</option>
+          <option value="Canto">Canto</option>
+          <option value="Piano">Piano</option>
+          <option value="Guitarra">Guitarra</option>
+        </select>
+        <button type="button" onclick="limpiarFiltros()">Limpiar Filtros</button>
+      </div>
+      <div id="song-list"></div>
+    </div>
+  
+    <!-- Pantalla de Agregar Nueva Canción -->
+    <div id="pantalla-agregar" class="hidden">
+      <button class="volver-button" onclick="volverInicio()">⬅ Volver al Inicio</button>
+      <h2>➕ Agregar Nueva Canción</h2>
+      <form id="add-song-form">
+        <input type="text" id="artista" placeholder="Artista" required>
+        <input type="text" id="nombre" placeholder="Nombre de la canción" required>
+  
+        <label>Género musical:</label>
+        <button type="button" onclick="mostrarOcultarGeneros()">Seleccionar Géneros</button>
+        <div class="checkbox-container hidden" id="genero">
+          <div class="checkbox-group">
+            <label><input type="checkbox" value="Clásico"> Clásico</label>
+            <label><input type="checkbox" value="Country"> Country</label>
+            <label><input type="checkbox" value="Blues"> Blues</label>
+            <label><input type="checkbox" value="Flamenco"> Flamenco</label>
+            <label><input type="checkbox" value="Funk"> Funk</label>
+            <label><input type="checkbox" value="Hip-Hop"> Hip-Hop</label>
+            <label><input type="checkbox" value="Jazz"> Jazz</label>
+            <label><input type="checkbox" value="Latin"> Latin</label>
+            <label><input type="checkbox" value="Pop"> Pop</label>
+            <label><input type="checkbox" value="Punk"> Punk</label>
+            <label><input type="checkbox" value="R&B"> R&B</label>
+            <label><input type="checkbox" value="Reggae"> Reggae</label>
+            <label><input type="checkbox" value="Rock"> Rock</label>
+            <label><input type="checkbox" value="Rumba"> Rumba</label>
+            <label><input type="checkbox" value="Soul"> Soul</label>
+            <label><input type="checkbox" value="Tradicional"> Tradicional</label>
+            <label><input type="checkbox" value="Urbano"> Urbano</label>
+          </div>
+          <button type="button" onclick="cerrarGeneros()">Confirmar selección</button>
+        </div>
+        <div id="genero-seleccionado"></div>
+  
+        <label for="dificultad">Dificultad:</label>
+        <select id="dificultad" required>
+          <option value="">Seleccione dificultad</option>
+          <option value="Rookie">Rookie</option>
+          <option value="D">D</option>
+          <option value="C">C</option>
+          <option value="B">B</option>
+          <option value="A">A</option>
+        </select>
+  
+        <label for="instrumento">Instrumento:</label>
+        <select id="instrumento" onchange="mostrarCamposCanto()">
+          <option value="">Seleccione un instrumento</option>
+          <option value="Canto">Canto</option>
+          <option value="Piano">Piano</option>
+          <option value="Guitarra">Guitarra</option>
+        </select>
+  
+        <div id="campos-canto" class="hidden">
+          <input type="text" id="registro" placeholder="Registro vocal">
+          <input type="text" id="notaMin" placeholder="Nota más baja">
+          <input type="text" id="notaMax" placeholder="Nota más alta">
+          <label for="idioma">Idioma:</label>
+          <select id="idioma">
+            <option value="">Seleccione idioma</option>
+            <option value="Alemán">Alemán</option>
+            <option value="Catalán">Catalán</option>
+            <option value="Español">Español</option>
+            <option value="Francés">Francés</option>
+            <option value="Inglés">Inglés</option>
+            <option value="Italiano">Italiano</option>
+            <option value="Portugués">Portugués</option>
+          </select>
+        </div>
+  
+        <input type="file" id="imagenLocal" accept="image/*">
+        <input type="url" id="urlPartitura" placeholder="URL de la partitura (opcional)">
+        <input type="url" id="urlYouTube" placeholder="URL de video YouTube (opcional)">
+        <button type="submit" id="submit-button">Guardar Canción</button>
+      </form>
+    </div>
+  
+  
+
+    <script>
+        let canciones = JSON.parse(localStorage.getItem('canciones')) || [];
+        let editandoCancionIndex = null;
+      
+        // Funciones de Sesión
+        function iniciarSesion() {
+          localStorage.setItem('isLoggedIn', 'true');
+          actualizarEstadoSesion();
+        }
+      
+        function cerrarSesion() {
+          localStorage.setItem('isLoggedIn', 'false');
+          actualizarEstadoSesion();
+        }
+      
+        function actualizarEstadoSesion() {
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+          document.getElementById('cerrar-sesion').classList.toggle('hidden', !isLoggedIn);
+          
+          const botonesAgregar = document.querySelectorAll('.menu-button');
+          botonesAgregar.forEach(btn => {
+            if (btn.textContent.includes('Agregar Nueva Canción')) {
+              btn.classList.toggle('hidden', !isLoggedIn);
+            }
+          });
+      
+          mostrarCanciones();
+        }
+      
+        // Navegación
+        function mostrarBusqueda() {
+          document.getElementById('pantalla-inicio').classList.add('hidden');
+          document.getElementById('pantalla-agregar').classList.add('hidden');
+          document.getElementById('pantalla-buscar').classList.remove('hidden');
+        }
+      
+        function mostrarAgregar() {
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+          if (!isLoggedIn) {
+            alert('Debes iniciar sesión para agregar canciones.');
+            return;
+          }
+          document.getElementById('pantalla-inicio').classList.add('hidden');
+          document.getElementById('pantalla-buscar').classList.add('hidden');
+          document.getElementById('pantalla-agregar').classList.remove('hidden');
+        }
+      
+        function volverInicio() {
+          document.getElementById('pantalla-buscar').classList.add('hidden');
+          document.getElementById('pantalla-agregar').classList.add('hidden');
+          document.getElementById('pantalla-inicio').classList.remove('hidden');
+          editandoCancionIndex = null;
+          document.getElementById('submit-button').textContent = 'Guardar Canción';
+        }
+      
+        // Mostrar/Ocultar Campos
+        function mostrarCamposCanto() {
+          const instrumento = document.getElementById('instrumento').value;
+          const camposCanto = document.getElementById('campos-canto');
+          if (instrumento === 'Canto') {
+            camposCanto.classList.remove('hidden');
+          } else {
+            camposCanto.classList.add('hidden');
+            document.getElementById('registro').value = '';
+            document.getElementById('notaMin').value = '';
+            document.getElementById('notaMax').value = '';
+            document.getElementById('idioma').value = '';
+          }
+        }
+      
+        function mostrarOcultarGeneros() {
+          document.getElementById('genero').classList.toggle('hidden');
+        }
+      
+        function cerrarGeneros() {
+          const checkboxes = document.querySelectorAll('#genero input[type=checkbox]');
+          const seleccionados = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+          document.getElementById('genero-seleccionado').innerText = seleccionados.length
+            ? 'Seleccionado: ' + seleccionados.join(', ')
+            : 'No hay géneros seleccionados';
+          document.getElementById('genero').classList.add('hidden');
+        }
+      
+        // Crear tarjeta de canción
+        function crearSongCard(song, index) {
+          const div = document.createElement('div');
+          div.className = 'song-card';
+      
+          if (song.urlImagen) {
+            div.style.backgroundImage = `url('${song.urlImagen}')`;
+            div.style.backgroundSize = 'cover';
+            div.style.backgroundPosition = 'center';
+          }
+      
+          const overlay = document.createElement('div');
+          overlay.className = 'overlay';
+      
+          const content = document.createElement('div');
+          content.className = 'content';
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      
+          content.innerHTML = `
+            <h3>${song.artista} - ${song.nombre}</h3>
+            <p><strong>Géneros:</strong> ${Array.isArray(song.genero) ? song.genero.join(', ') : 'N/A'}</p>
+            <p><strong>Dificultad:</strong> ${song.dificultad}</p>
+            <p><strong>Instrumento:</strong> ${song.instrumento || 'N/A'}</p>
+            ${song.instrumento === 'Canto' ? `
+              <p><strong>Registro vocal:</strong> ${song.registro}</p>
+              <p><strong>Nota más baja:</strong> ${song.notaMin}</p>
+              <p><strong>Nota más alta:</strong> ${song.notaMax}</p>
+              <p><strong>Idioma:</strong> ${song.idioma}</p>` : ''}
+            ${song.urlPartitura ? `<p><a href="${song.urlPartitura}" target="_blank" style="color: #ffd700;">📄 Ver Partitura</a></p>` : ''}
+            ${song.urlYouTube ? `<p><a href="${song.urlYouTube}" target="_blank" style="color: #ffd700;">🎥 Ver Video</a></p>` : ''}
+            ${isLoggedIn ? `
+              <button onclick="editarCancion(${index})">✏️ Editar</button>
+              <button onclick="eliminarCancion(${index})">🗑️ Eliminar</button>
+            ` : ''}
+          `;
+      
+          div.appendChild(overlay);
+          div.appendChild(content);
+          return div;
+        }
+      
+        function mostrarCanciones(lista = canciones) {
+          const songList = document.getElementById('song-list');
+          songList.innerHTML = '';
+          lista.forEach((song, index) => {
+            const songCard = crearSongCard(song, index);
+            songList.appendChild(songCard);
+          });
+        }
+      
+        function filtrarCanciones() {
+          const dificultadSeleccionada = document.getElementById('filtro-dificultad').value;
+          const instrumentoSeleccionado = document.getElementById('filtro-instrumento').value;
+          let cancionesFiltradas = canciones;
+      
+          if (dificultadSeleccionada) {
+            cancionesFiltradas = cancionesFiltradas.filter(song => song.dificultad === dificultadSeleccionada);
+          }
+          if (instrumentoSeleccionado) {
+            cancionesFiltradas = cancionesFiltradas.filter(song => song.instrumento === instrumentoSeleccionado);
+          }
+          mostrarCanciones(cancionesFiltradas);
+        }
+      
+        function limpiarFiltros() {
+          document.getElementById('filtro-dificultad').value = '';
+          document.getElementById('filtro-instrumento').value = '';
+          mostrarCanciones();
+        }
+      
+        function editarCancion(index) {
+          const song = canciones[index];
+          document.getElementById('artista').value = song.artista;
+          document.getElementById('nombre').value = song.nombre;
+      
+          const checkboxes = document.querySelectorAll('#genero input[type=checkbox]');
+          checkboxes.forEach(cb => {
+            cb.checked = song.genero.includes(cb.value);
+          });
+          cerrarGeneros();
+      
+          document.getElementById('dificultad').value = song.dificultad;
+          document.getElementById('instrumento').value = song.instrumento;
+          mostrarCamposCanto();
+      
+          if (song.instrumento === 'Canto') {
+            document.getElementById('registro').value = song.registro;
+            document.getElementById('notaMin').value = song.notaMin;
+            document.getElementById('notaMax').value = song.notaMax;
+            document.getElementById('idioma').value = song.idioma;
+          }
+      
+          document.getElementById('urlPartitura').value = song.urlPartitura || '';
+          document.getElementById('urlYouTube').value = song.urlYouTube || '';
+      
+          editandoCancionIndex = index;
+          document.getElementById('submit-button').textContent = 'Actualizar Canción';
+          mostrarAgregar();
+        }
+      
+        function eliminarCancion(index) {
+          if (confirm('¿Seguro que quieres eliminar esta canción?')) {
+            canciones.splice(index, 1);
+            localStorage.setItem('canciones', JSON.stringify(canciones));
+            filtrarCanciones();
+          }
+        }
+      
+        document.getElementById('add-song-form').addEventListener('submit', function(event) {
+          event.preventDefault();
+      
+          const artista = document.getElementById('artista').value;
+          const nombre = document.getElementById('nombre').value;
+          const checkboxes = document.querySelectorAll('#genero input[type=checkbox]');
+          const genero = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+          const dificultad = document.getElementById('dificultad').value;
+          const instrumento = document.getElementById('instrumento').value;
+          const registro = document.getElementById('registro').value;
+          const notaMin = document.getElementById('notaMin').value;
+          const notaMax = document.getElementById('notaMax').value;
+          const idioma = document.getElementById('idioma').value;
+          const urlPartitura = document.getElementById('urlPartitura').value;
+          const urlYouTube = document.getElementById('urlYouTube').value;
+          const imagenFile = document.getElementById('imagenLocal').files[0];
+      
+          if (imagenFile) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const urlImagen = e.target.result;
+              guardarCancion({
+                artista, nombre, genero, dificultad, instrumento,
+                registro: instrumento === 'Canto' ? registro : '',
+                notaMin: instrumento === 'Canto' ? notaMin : '',
+                notaMax: instrumento === 'Canto' ? notaMax : '',
+                idioma: instrumento === 'Canto' ? idioma : '',
+                urlPartitura, urlYouTube,
+                urlImagen
+              });
+            };
+            reader.readAsDataURL(imagenFile);
+          } else {
+            guardarCancion({
+              artista, nombre, genero, dificultad, instrumento,
+              registro: instrumento === 'Canto' ? registro : '',
+              notaMin: instrumento === 'Canto' ? notaMin : '',
+              notaMax: instrumento === 'Canto' ? notaMax : '',
+              idioma: instrumento === 'Canto' ? idioma : '',
+              urlPartitura, urlYouTube,
+              urlImagen: editandoCancionIndex !== null ? canciones[editandoCancionIndex].urlImagen : ''
+            });
+          }
+        });
+      
+        function guardarCancion(newSong) {
+          if (editandoCancionIndex !== null) {
+            canciones[editandoCancionIndex] = newSong;
+            editandoCancionIndex = null;
+            document.getElementById('submit-button').textContent = 'Guardar Canción';
+          } else {
+            canciones.push(newSong);
+          }
+      
+          localStorage.setItem('canciones', JSON.stringify(canciones));
+          document.getElementById('add-song-form').reset();
+          document.getElementById('genero-seleccionado').innerText = '';
+          document.getElementById('campos-canto').classList.add('hidden');
+          document.getElementById('genero').classList.add('hidden');
+          volverInicio();
+          filtrarCanciones();
+        }
+      
+        // Iniciar app
+        actualizarEstadoSesion();
+        mostrarCanciones();
+      </script>      
+  
+
+
+
+</body>
+</html>
